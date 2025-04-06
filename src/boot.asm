@@ -1,4 +1,5 @@
-%define ENDL 0xD, 0xA, 0x0  ; Equals to the string -> "\r\n\0"
+%include 'src/macros.inc'
+
 
 [bits 16]
 [org 0x7C00]
@@ -41,11 +42,16 @@ jc error
 mov si, kernel_A20
 call write_string
 
-mov al, 0x2
+xor ax, ax
+mov es, ax
+mov al, 0x1
 mov cx, 0x2
-xor dx, dx
-mov bx, new_sect
+mov bx, 0x7E00
 call get_from_floppy
+
+mov si, kernel_load2
+call write_string
+jmp 0x7E00
 error:
 hlt
 
@@ -142,11 +148,11 @@ get_from_floppy:
 ; al - sectors to read
 ; es:bx - data buffer
 ; cx - Cylinder number (CL) and sector number (CL)
-; dx - head number (DH) and drive number (DL)
 pusha
-xor ah, ah
+mov ah, 0x2
+xor dx, dx
 mov di, 0x2 ; Try 3 times
-clc ; Making sure the carry flag is clear
+stc ; Making sure the carry flag is clear
 .loop:
  int 0x13
  jnc .end
@@ -161,8 +167,6 @@ ret
 
 kernel_hi: db 'Hello from boot', ENDL
 kernel_A20: db 'Line A20 enabled', ENDL
-
-data_size:
+kernel_load2: db 'Stage 2 loaded at 0x7E00', ENDL
 times (510-($-$$)) db 0
 dw 0xAA55
-new_sect:

@@ -1,1 +1,1 @@
-qemu-system-i386 -fda build/boot.img
+qemu-system-i386 -fda build/kernel.img
