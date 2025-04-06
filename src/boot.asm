@@ -1,10 +1,35 @@
-%define write_string 0x7C02 ; Hardcoded value for write_string function
 %define ENDL 0xD, 0xA, 0x0  ; Equals to the string -> "\r\n\0"
 
 [bits 16]
-[org 0x7E00]
+[org 0x7C00]
+jmp main
+
+write_string:
+; si
+push ax
+push bx
+xor bx, bx
+mov ah, 0xE
+.loop:
+ lodsb
+ or al, al
+ jz .end
+ int 0x10
+ jmp .loop
+.end:
+pop bx
+pop ax
+ret
 
 main:
+xor ax, ax
+xor bx, bx
+xor di, di
+mov sp, 0x7C00
+mov ds, ax
+mov es, ax
+mov ss, ax
+
 mov si, kernel_hi
 call write_string
 call check_a20
@@ -15,10 +40,12 @@ jc error
 .enabled:
 mov si, kernel_A20
 call write_string
+
 mov al, 0x2
 mov cx, 0x2
 xor dx, dx
 mov bx, new_sect
+call get_from_floppy
 error:
 hlt
 
@@ -124,19 +151,18 @@ clc ; Making sure the carry flag is clear
  int 0x13
  jnc .end
  test di, di
- jz .err
+ jz error
  call reset_floppy
  dec di
  jmp .loop
 .end:
 popa
 ret
-.err:
-hlt
 
-kernel_hi: db 'Hello from kernel', ENDL
+kernel_hi: db 'Hello from boot', ENDL
 kernel_A20: db 'Line A20 enabled', ENDL
 
 data_size:
-times (512-($-$$)) db 0
+times (510-($-$$)) db 0
+dw 0xAA55
 new_sect:
