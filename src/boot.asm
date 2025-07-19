@@ -1,6 +1,11 @@
+section .boot
 [bits 16]
-[org 0x7C00]
-jmp main
+jmp boot
+
+global boot
+global gdt_start
+
+%define ENDL 0xA,0x13,0x0
 
 write_string:
 ; si
@@ -18,42 +23,6 @@ mov ah, 0xE
 pop bx
 pop ax
 ret
-
-main:
-xor ax, ax
-xor bx, bx
-xor di, di
-mov sp, 0x7C00
-mov ds, ax
-mov es, ax
-mov ss, ax
-
-mov si, kernel_hi
-call write_string
-call check_a20
-or ax, ax
-jnz .enabled
-call enable_A20
-jc error
-.enabled:
-mov si, kernel_A20
-call write_string
-
-;xor ax, ax
-;mov es, ax
-;mov al, 0x1
-;mov cx, 0x2
-;mov bx, 0x7E00
-;call get_from_floppy
-;mov si, kernel_load2
-;call write_string
-;jmp past 
-
-
-
-
-error:
-hlt
 
 check_a20:
 ; ax - 0 if not enabled; 1 - if enabled
@@ -164,9 +133,82 @@ stc ; Making sure the carry flag is clear
 popa
 ret
 
+error:
+ hlt
+
+boot:
+xor ax, ax
+xor bx, bx
+xor di, di
+mov sp, 0x7C00
+mov ds, ax
+mov es, ax
+mov ss, ax
+
+mov si, kernel_hi
+call write_string
+call check_a20
+or ax, ax
+jnz .enabled
+call enable_A20
+jc error
+.enabled:
+mov si, kernel_A20
+call write_string
+
+xor ax, ax
+mov es, ax
+mov al, 0x1
+mov cx, 0x2
+mov bx, 0x7E00
+call get_from_floppy
+mov si, kernel_load2
+call write_string
+jmp past 
+
+cli
+mov eax, cr0
+or  al, 1
+mov cr0, eax
+lgdt [gdt_info]
+jmp 8:boot_32
+
+gdt_start:
+ dq 0x0
+gdt_code:
+ dw 0xFFFF
+ dw 0x0
+ db 0x0
+ db 10011010b
+ db 11011111b
+ db 0x0
+gdt_data:
+ dw 0xFF
+ dw 0x0
+ db 0x0
+ db 10010010b
+ db 11011111b
+ db 0x0 
+gdt_end:
+gdt_info:
+ dw gdt_end - gdt_start
+ dd gdt_start
+
+gdt_code_seg equ gdt_data - gdt_code
+gdt_data_seg equ gdt_end - gdt_code
+
+[bits 32]
+boot_32:
+ mov ax, gdt_data
+ mov es, ax
+ mov ss, ax
+ mov gs, ax
+ mov ds, ax
+ mov fs, ax
+
 kernel_hi: db 'Hello from boot', ENDL
 kernel_A20: db 'Line A20 enabled', ENDL
 kernel_load2: db 'Stage 2 loaded at 0x7E00', ENDL
 times (510-($-$$)) db 0
 dw 0xAA55
-past:
+table
