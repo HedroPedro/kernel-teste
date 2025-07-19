@@ -1,6 +1,3 @@
-%include 'src/macros.inc'
-
-
 [bits 16]
 [org 0x7C00]
 jmp main
@@ -42,16 +39,19 @@ jc error
 mov si, kernel_A20
 call write_string
 
-xor ax, ax
-mov es, ax
-mov al, 0x1
-mov cx, 0x2
-mov bx, 0x7E00
-call get_from_floppy
+;xor ax, ax
+;mov es, ax
+;mov al, 0x1
+;mov cx, 0x2
+;mov bx, 0x7E00
+;call get_from_floppy
+;mov si, kernel_load2
+;call write_string
+;jmp past 
 
-mov si, kernel_load2
-call write_string
-jmp 0x7E00
+
+
+
 error:
 hlt
 
@@ -93,9 +93,8 @@ query_A20_support:
 mov ax, 0x2403
 int 0x15
 jc .err
-test ah, ah
-jnz .err
-jmp short .end
+or ah, ah
+jz .end
 .err:
 stc
 .end:
@@ -170,3 +169,4 @@ kernel_A20: db 'Line A20 enabled', ENDL
 kernel_load2: db 'Stage 2 loaded at 0x7E00', ENDL
 times (510-($-$$)) db 0
 dw 0xAA55
+past:

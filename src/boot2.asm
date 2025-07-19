@@ -1,12 +1,21 @@
-%include 'src/macros.inc'
-
 [bits 16]
 [org 0x7E00]
 
-%define write_string 0x7C02
+main:
+ mov ax, cr0
+ or ax, 0x1
+ mov cr0
+ lgdt 
 
-mov si, msg
-call write_string
-hlt
 
-msg: db 'Hello boot 2',0
+gdt_start:
+
+gdt_end:
+
+gdt_info:
+ dw gdt_end - gdt_start
+
+
+
+
+table_list:
