@@ -1,9 +1,7 @@
 section .boot
 [bits 16]
+[org 0x7C00]
 jmp boot
-
-global boot
-global gdt_start
 
 %define ENDL 0xA,0x13,0x0
 
@@ -22,84 +20,6 @@ mov ah, 0xE
 .end:
 pop bx
 pop ax
-ret
-
-check_a20:
-; ax - 0 if not enabled; 1 - if enabled
-push ds
-push es
-cli
-xor ax, ax
-mov es, ax
-
-not ax
-mov ds, ax
-
-mov di, 0x0500
-mov si, 0x0510
-
-mov al, byte[es:di]
-mov ah, byte[ds:si]
-push ax
-
-mov byte[es:di], 0x00
-mov byte[ds:si], 0xFF
-cmp byte[es:di], 0xFF
-
-mov ax, 1
-jne .end
-xor ax, ax
-
-.end:
-pop ax
-mov [es:di], al
-mov [ds:si], ah
-pop es
-pop ds
-ret
-
-query_A20_support:
-mov ax, 0x2403
-int 0x15
-jc .err
-or ah, ah
-jz .end
-.err:
-stc
-.end:
-ret
-
-enable_A20:
-clc
-call query_A20_support
-jc .method2
-
-.method1:
-mov ax, 0x2401
-int 0x15
-jc .method2
-test ah, ah
-jnz .method2
-
-call check_a20
-test ax, ax
-jnz .end
-
-.method2:
-in al, 0x92
-test al, 2
-jnz .end
-or al, 2
-and al, 0xFE
-out 0x92, al
-
-call check_a20
-test ax, ax
-jnz .end
-.error:
-stc
-hlt
-.end:
 ret
 
 reset_floppy:
@@ -145,34 +65,53 @@ mov ds, ax
 mov es, ax
 mov ss, ax
 
-mov si, kernel_hi
-call write_string
-call check_a20
-or ax, ax
-jnz .enabled
-call enable_A20
+set_A20:
+mov ax, 0x2401
+int 0x15
 jc error
-.enabled:
-mov si, kernel_A20
-call write_string
 
-xor ax, ax
-mov es, ax
-mov al, 0x1
-mov cx, 0x2
-mov bx, 0x7E00
-call get_from_floppy
-mov si, kernel_load2
-call write_string
-jmp past 
+set_VGA:
+mov ax, 0x3
+int 0x10
+
+get_memory_map:
+lea di,  [memory_map+2]
+mov eax, 0xE820
+xor ebx, ebx
+mov ecx, 20
+mov edx, 'SMAP'
+int 0x15
+.loop_map:
+ or ebx, ebx
+ jz .end
+ cmp eax, 'SMAP'
+ jne error
+ mov eax, 0xE820
+ int 0x15
+ inc word[memory_map]
+ jmp .loop_map
+.end:
+
+;xor ax, ax
+;mov es, ax
+;mov al, 0x1
+;mov cx, 0x2
+;mov bx, 0x7E00
+;call get_from_floppy
+;mov si, kernel_load2
+;call write_string
 
 cli
-mov eax, cr0
-or  al, 1
-mov cr0, eax
 lgdt [gdt_info]
-jmp 8:boot_32
+mov eax, cr0
+or  eax, 1
+mov cr0, eax
 
+jmp CODE_SEG:boot_32
+
+gdt_info:
+ dw gdt_end - gdt_start
+ dd gdt_start
 gdt_start:
  dq 0x0
 gdt_code:
@@ -190,25 +129,28 @@ gdt_data:
  db 11011111b
  db 0x0 
 gdt_end:
-gdt_info:
- dw gdt_end - gdt_start
- dd gdt_start
-
-gdt_code_seg equ gdt_data - gdt_code
-gdt_data_seg equ gdt_end - gdt_code
 
 [bits 32]
 boot_32:
- mov ax, gdt_data
- mov es, ax
- mov ss, ax
- mov gs, ax
- mov ds, ax
- mov fs, ax
+ sti
+ mov si, hello_32
+ mov ah, 112
+ mov ebx, 0xB8000
+ .loop:
+  lodsb
+  or al, al
+  jz .end
+  mov [ebx], ax
+  add ebx, 2
+  jmp .loop
+.end:
+ cli
+ hlt 
 
-kernel_hi: db 'Hello from boot', ENDL
-kernel_A20: db 'Line A20 enabled', ENDL
-kernel_load2: db 'Stage 2 loaded at 0x7E00', ENDL
+hello_32: db 'Hello from 32', 0x0
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
+
 times (510-($-$$)) db 0
 dw 0xAA55
-table
+memory_map:
