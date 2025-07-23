@@ -1,9 +1,7 @@
-section .boot
 [bits 16]
-[org 0x7C00]
+section .boot
+global boot
 jmp boot
-
-%define ENDL 0xA,0x13,0x0
 
 write_string:
 ; si
@@ -92,20 +90,19 @@ int 0x15
  jmp .loop_map
 .end:
 
-;xor ax, ax
-;mov es, ax
-;mov al, 0x1
-;mov cx, 0x2
-;mov bx, 0x7E00
-;call get_from_floppy
-;mov si, kernel_load2
-;call write_string
+xor ax, ax
+mov es, ax
+mov al, 0x6
+mov cx, 0x2
+mov bx, 0x7E00
+call get_from_floppy
 
 cli
 lgdt [gdt_info]
 mov eax, cr0
 or  eax, 1
 mov cr0, eax
+sti
 
 jmp CODE_SEG:boot_32
 
@@ -130,27 +127,26 @@ gdt_data:
  db 0x0 
 gdt_end:
 
-[bits 32]
-boot_32:
- sti
- mov si, hello_32
- mov ah, 112
- mov ebx, 0xB8000
- .loop:
-  lodsb
-  or al, al
-  jz .end
-  mov [ebx], ax
-  add ebx, 2
-  jmp .loop
-.end:
- cli
- hlt 
-
 hello_32: db 'Hello from 32', 0x0
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
 times (510-($-$$)) db 0
 dw 0xAA55
+beyond_target:
+[bits 32]
+extern kmain
+boot_32:
+ mov esp, stack_top
+ call kmain
+ cli
+ hlt
+ 
+section .bss
+global memory_map
+stack_base:
+ resb 1024*16
+stack_top:
 memory_map:
+ resb 1
+

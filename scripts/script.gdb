@@ -1,2 +1,2 @@
 set architecture i386
-target remote | qemu-system-i386 -S -gdb stdio -fda build/kernel.img
+target remote | qemu-system-i386 -S -gdb stdio -fda build/os.img

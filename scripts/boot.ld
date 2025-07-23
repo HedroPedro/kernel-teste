@@ -1,4 +1,4 @@
-ENTRY(main)
+ENTRY(boot)
 OUTPUT_FORMAT("binary")
 SECTIONS {
 	. = 0x7C00;

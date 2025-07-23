@@ -1,19 +1,24 @@
 AS=nasm
-ASFLAGS=-fbin
+ASFLAGS=-felf32
+CC=i686-elf-gcc
+CCFLAGS=-lgcc -nostdlib -ffreestanding -std=gnu99 -Wextra -Wall -T
 SRCDIR=src
 BUILDDIR=build
+SCRIPTDIR=scripts
 
 .PHONY: clean
 
-make: $(BUILDDIR)/boot.bin 	
-	cat $^ > $(BUILDDIR)/kernel.bin 
-	dd if=$(BUILDDIR)/kernel.bin of=$(BUILDDIR)/kernel.img
+make: $(BUILDDIR)/os.bin
+	dd if=$< of=$(BUILDDIR)/os.img
 
-$(BUILDDIR)/boot.bin: $(SRCDIR)/boot.asm $(BUILDDIR)/
+$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c
+	$(CC) $^ -o $@ $(CCFLAGS) $(SCRIPTDIR)/boot.ld
+
+$(BUILDDIR)/boot.o: $(SRCDIR)/boot.asm $(BUILDDIR)/
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(BUILDDIR)/:
 	mkdir $(BUILDDIR)
 
 clean:
-	rm -f $(BUILDDIR)/*.bin $(BUILDDIR)/*.img
+	rm -f $(BUILDDIR)/*.bin $(BUILDDIR)/*.img $(BUILDDIR)/*.o
