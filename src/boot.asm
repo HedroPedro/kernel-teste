@@ -1,4 +1,5 @@
 [bits 16]
+%define SMAP 0x0534D4150
 section .boot
 global boot
 jmp boot
@@ -31,14 +32,13 @@ pop ax
 ret
 
 get_from_floppy:
-; al - sectors to read
-; es:bx - data buffer
+; al - Sectors to read
+; es:bx - Data buffer
 ; cx - Cylinder number (CL) and sector number (CL)
 pusha
 mov ah, 0x2
 xor dx, dx
-mov di, 0x2 ; Try 3 times
-stc ; Making sure the carry flag is clear
+clc ; Making sure the carry flag is clear
 .loop:
  int 0x13
  jnc .end
@@ -56,9 +56,10 @@ error:
 
 boot:
 xor ax, ax
-xor bx, bx
-xor di, di
+mov bx, ax
+mov di, ax
 mov sp, 0x7C00
+xor bp, bp
 mov ds, ax
 mov es, ax
 mov ss, ax
@@ -71,24 +72,6 @@ jc error
 set_VGA:
 mov ax, 0x3
 int 0x10
-
-get_memory_map:
-lea di,  [memory_map+2]
-mov eax, 0xE820
-xor ebx, ebx
-mov ecx, 20
-mov edx, 'SMAP'
-int 0x15
-.loop_map:
- or ebx, ebx
- jz .end
- cmp eax, 'SMAP'
- jne error
- mov eax, 0xE820
- int 0x15
- inc word[memory_map]
- jmp .loop_map
-.end:
 
 xor ax, ax
 mov es, ax
@@ -127,7 +110,6 @@ gdt_data:
  db 0x0 
 gdt_end:
 
-hello_32: db 'Hello from 32', 0x0
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
@@ -137,8 +119,13 @@ beyond_target:
 [bits 32]
 extern kmain
 boot_32:
+ mov ax, DATA_SEG
+ mov es, ax
+ mov ds, ax
+ mov ss, ax
  mov esp, stack_top
  call kmain
+ 
  cli
  hlt
  
@@ -147,6 +134,3 @@ global memory_map
 stack_base:
  resb 1024*16
 stack_top:
-memory_map:
- resb 1
-
