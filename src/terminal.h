@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 void write_on_terminal(char *str, uint8_t x, uint8_t y);
-void set_color(uint8_t color); 
+char get_from_terminal(uint8_t x, uint8_t y);
+void set_color(uint8_t color);
 
 #endif
