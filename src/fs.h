@@ -20,7 +20,7 @@ typedef struct file {
     char name[16];
     uint32_t next_sector;
     uint32_t next_track;
-} __attribute__((packed)) file;
+} __attribute__((packed)) File;
 
 void read_from_disk();
 void write_to_disk();

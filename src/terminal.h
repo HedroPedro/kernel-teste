@@ -2,8 +2,11 @@
 #define TERMINAL_H_
 #include <stdint.h>
 
-void write_on_terminal(char *str, uint8_t x, uint8_t y);
-char get_from_terminal(uint8_t x, uint8_t y);
+#define MAX_COLUMNS 25
+#define MAX_LINES   80
+
+void write_char(const char chr); 
+void write_text(const char *text);
 void set_color(uint8_t color);
 
 #endif

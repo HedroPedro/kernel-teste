@@ -11,7 +11,7 @@ SCRIPTDIR=scripts
 make: $(BUILDDIR)/os.bin
 	dd if=$< of=$(BUILDDIR)/os.img
 
-$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c
+$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c $(SRCDIR)/terminal.c
 	$(CC) $^ -o $@ $(CCFLAGS) $(SCRIPTDIR)/boot.ld
 
 $(BUILDDIR)/boot.o: $(SRCDIR)/boot.asm $(BUILDDIR)/

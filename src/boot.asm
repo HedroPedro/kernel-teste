@@ -132,5 +132,5 @@ boot_32:
 section .bss
 global memory_map
 stack_base:
- resb 1024*16
+ resb 1024*32
 stack_top:
