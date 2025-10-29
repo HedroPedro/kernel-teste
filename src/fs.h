@@ -22,6 +22,6 @@ typedef struct file {
     uint32_t next_track;
 } __attribute__((packed)) File;
 
-void read_from_disk();
-void write_to_disk();
+void read_from_disk(void *buff, uint32_t sector, uint32_t track);
+void write_to_disk(void *buff, uint32_t len, uint32_t sector, uint32_t track);
 #endif

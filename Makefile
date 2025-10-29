@@ -1,7 +1,7 @@
 AS=nasm
 ASFLAGS=-felf32
 CC=i686-elf-gcc
-CCFLAGS=-lgcc -nostdlib -ffreestanding -std=gnu99 -Wextra -Wall -T
+CCFLAGS=-lgcc -nostdlib -masm=intel -ffreestanding -std=gnu99 -Wextra -Wall -T
 SRCDIR=src
 BUILDDIR=build
 SCRIPTDIR=scripts
@@ -11,7 +11,7 @@ SCRIPTDIR=scripts
 make: $(BUILDDIR)/os.bin
 	dd if=$< of=$(BUILDDIR)/os.img
 
-$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c $(SRCDIR)/terminal.c
+$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c $(SRCDIR)/graphics/terminal.c
 	$(CC) $^ -o $@ $(CCFLAGS) $(SCRIPTDIR)/boot.ld
 
 $(BUILDDIR)/boot.o: $(SRCDIR)/boot.asm $(BUILDDIR)/
