@@ -1,6 +1,7 @@
 #ifndef FS_H_
 #define FS_H_
 #include <stdint.h>
+#include "descriptor.h"
 
 enum FS_TYPE {
     DIRECTORY = 0x10,
