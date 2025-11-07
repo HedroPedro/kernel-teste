@@ -1,5 +1,6 @@
 global isr_table
 extern exception_handler
+extern get_keyboard_input
 
 %macro isr_err_stub 1
 isr_err_stub%+%1:
@@ -18,3 +19,7 @@ isr_table:
 	dd isr_err_stub_%+i
 %assign i i+1
 %endrep
+keyboard_int:
+    call get_keyboard_input
+    iret
+
