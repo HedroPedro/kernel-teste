@@ -1,13 +1,13 @@
 #ifndef INTERRUPTS_H_
 #define INTERRUPTS_H_
 #include <stdint.h>
-#define MAS_SIZE 33
+#define MAX_IDT_SIZE 33
 typedef struct {
-	uint16_t offset_15_00;
+	uint16_t isr_low;
 	uint16_t selector;
 	uint8_t  reserved;
 	uint8_t  attributes;
-	uint16_t offset_31_16;
+	uint16_t isr_high;
 } __attribute__((packed)) idt_desc;
 
 typedef struct {
