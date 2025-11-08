@@ -16,10 +16,6 @@ isr_no_err_stub%+%1:
 isr_table:
 %assign i 0
 %rep    32
-	dd isr_err_stub_%+i
+	isr_err_stub%+i:	
 %assign i i+1
 %endrep
-keyboard_int:
-    call get_keyboard_input
-    iret
-

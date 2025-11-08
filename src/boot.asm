@@ -85,7 +85,6 @@ lgdt [gdt_info]
 mov eax, cr0
 or  eax, 1
 mov cr0, eax
-sti
 
 jmp CODE_SEG:boot_32
 

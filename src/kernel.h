@@ -4,4 +4,5 @@
 #include <stdbool.h>
 #include "io/ports.h"
 #include "graphics/terminal.h"
+#include "interrupts.h"
 #endif

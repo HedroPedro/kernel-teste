@@ -1,7 +1,8 @@
 #ifndef INTERRUPTS_H_
 #define INTERRUPTS_H_
 #include <stdint.h>
-#define MAX_IDT_SIZE 33
+#include <stdbool.h>
+#define MAX_IDT_SIZE 47
 typedef struct {
 	uint16_t isr_low;
 	uint16_t selector;
@@ -12,11 +13,11 @@ typedef struct {
 
 typedef struct {
 	uint16_t limit;
-	uint32_t base_address;
+	uint32_t base;
 } __attribute__((packed)) idt_reg;
 
 void idt_init(void);
-void idt_set_desc(uint8_t vector, void *isr, uint8 flags);
+void idt_set_desc(uint8_t vector, void *isr, uint8_t flags);
 void exception_handler(void);
 
 #endif
