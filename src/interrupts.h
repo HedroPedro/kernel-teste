@@ -2,7 +2,7 @@
 #define INTERRUPTS_H_
 #include <stdint.h>
 #include <stdbool.h>
-#define MAX_IDT_SIZE 47
+#define MAX_IDT_SIZE 48
 typedef struct {
 	uint16_t isr_low;
 	uint16_t selector;

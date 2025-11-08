@@ -23,7 +23,7 @@ isr_no_err_stub%+i:
 keyboard_int:
 	call get_key
 %assign i 34
-%rep 13
+%rep 14
 	isr_err_stub%+i:
 %assign i i+1
 %endrep
