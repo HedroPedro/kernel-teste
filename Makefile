@@ -6,19 +6,21 @@ SRCDIR=src
 BUILDDIR=build
 SCRIPTDIR=scripts
 
-.PHONY: clean
+C_SRC=$(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
+ASM_SRC=$(wildcard $(SRCDIR)/**/*.asm) $(wildcard $(SRCDIR)/*.asm)
 
-make: $(BUILDDIR)/os.bin
+ASM_OBJ=$(patsubst $(SRCDIR)/%.asm,$(BUILDDIR)/%.o,$(ASM_SRC))
+.PHONY: all clean
+
+all: $(BUILDDIR)/os.bin
 	dd if=$< of=$(BUILDDIR)/os.img
 
-$(BUILDDIR)/os.bin: $(BUILDDIR)/boot.o $(SRCDIR)/kernel.c $(SRCDIR)/io/ports.c $(SRCDIR)/graphics/terminal.c $(SRCDIR)/keyboard.c $(SRCDIR)/interrupts.c $(BUILDDIR)/idt.o
+$(BUILDDIR)/os.bin: $(ASM_OBJ) $(C_SRC)
 	$(CC) $^ -o $@ $(CCFLAGS) $(SCRIPTDIR)/boot.ld
 
-$(BUILDDIR)/idt.o: $(SRCDIR)/idt.asm | $(BUILDDIR)/
+$(BUILDDIR)/%.o: $(SRCDIR)/%.asm | $(BUILDDIR)/
 	$(AS) $(ASFLAGS) $< -o $@
 
-$(BUILDDIR)/boot.o: $(SRCDIR)/boot.asm | $(BUILDDIR)/
-	$(AS) $(ASFLAGS) $< -o $@
 
 $(BUILDDIR)/:
 	mkdir $(BUILDDIR)
