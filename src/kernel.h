@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "io/ports.h"
+#include "io/pic.h"
 #include "graphics/terminal.h"
 #include "interrupts.h"
 #endif

@@ -1,1 +1,2 @@
-qemu-system-i386 -fda build/os.img
+qemu-system-i386 -fda build/os.img 
+

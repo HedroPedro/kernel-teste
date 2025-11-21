@@ -17,7 +17,7 @@ void pic_init(void) {
 	io_wait();
 	outb(PIC1_DATA, ICW4);			
 	io_wait();
-	outb(PC2_DATA, ICW4);	
+	outb(PIC2_DATA, ICW4);	
 	io_wait();
 
 	outb(PIC1_DATA, 0);
@@ -30,8 +30,6 @@ void pic_disable(void) {
 }
 
 void pic_sendEOI(uint8_t irq) {
-	uint16_t port;
-	uint8_t value;
 	if (irq >= 8)
 		outb(PIC2_CMD, PIC_EOI);
 	outb(PIC1_CMD, PIC_EOI);

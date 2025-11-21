@@ -124,7 +124,6 @@ boot_32:
  mov ss, ax
  mov esp, stack_top
  call kmain
- 
  cli
  hlt
  
