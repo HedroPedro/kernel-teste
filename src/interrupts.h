@@ -19,5 +19,6 @@ typedef struct {
 void idt_init(void);
 void idt_set_desc(uint8_t vector, void *isr, uint8_t flags);
 void exception_handler(void);
-
+int32_t get_service(uint32_t index, uint32_t arg2, uint32_t arg3);
+int32_t read_file(uint32_t fd, uint32_t bytes);
 #endif

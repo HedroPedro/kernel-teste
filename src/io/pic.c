@@ -1,4 +1,5 @@
 #include "pic.h"
+#include "ports.h"
 #define OFFSET1 0x20
 #define OFFSET2 0x28
 

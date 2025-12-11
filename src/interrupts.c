@@ -5,6 +5,11 @@ static idt_desc idt[256];
 static idt_reg idtr;
 extern void *isr_table[];
 
+
+typedef int32_t (*service_fun)(uint32_t, uint32_t);
+
+service_fun services[] = { read_file };
+
 void idt_init(void) {
 	idtr.base = (uint32_t) &idt[0];
 	idtr.limit = (uint16_t) sizeof(idt_desc) * (MAX_IDT_SIZE - 1);
@@ -29,4 +34,16 @@ void exception_handler(void) {
 	asm volatile (
 		"cli;\n"
 		"hlt;\n");
+}
+
+int32_t get_service(uint32_t index, uint32_t arg0, uint32_t arg1) {
+	if (index >= (sizeof(services)/sizeof(service_fun))) {
+		exception_handler();
+		return -1;
+	}
+	return services[index](arg0, arg1);
+}
+
+int32_t read_file(uint32_t arg0, uint32_t arg1) {
+	return 'a';
 }

@@ -6,5 +6,4 @@ void kmain(void) {
 	const char* hello = "Hello c world!";
 	set_color(color);
 	write_text(hello); 
-	while(true);
 }
