@@ -4,4 +4,8 @@ You can find here:
 - How the file system works and it's structure
 
 
-# Interrupts
+# Services
+There are 3 base services that can be used as base:
+1. read_file
+2. write_file
+3. read_write_file
