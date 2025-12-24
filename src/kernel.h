@@ -5,5 +5,5 @@
 #include "io/ports.h"
 #include "io/pic.h"
 #include "graphics/terminal.h"
-#include "interrupts.h"
+#include "syscalls/interrupts.h"
 #endif
